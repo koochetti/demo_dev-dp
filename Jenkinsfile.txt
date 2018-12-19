@@ -15,7 +15,7 @@ pipeline
             sh 'mkdir -p demo-common'
             dir('demo-common')
 			{
-				sh ''' git clone -b demo-common https://github.com/koochetti/demo-common.git ''' 
+				checkout changelog: false, poll: false , scm: [$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/demo-common']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'e0d93970-9f7c-46b2-84e3-a32689425', url: 'https://github.com/koochetti/demo-common.git']]]
 			}
             dir('demo-common')
 			{
@@ -32,7 +32,7 @@ pipeline
             dir('demo-test')
 			{
 			
-				sh ''' git clone -b demo-test https://github.com/koochetti/demo-test.git '''
+				checkout changelog: false, poll: false , scm: [$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/demo-test']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'e0d93970-9f7c-46b2-84e3-a32689425', url: 'https://github.com/koochetti/demo-test.git']]]
             }
             dir('demo-test')
 			{
@@ -74,14 +74,23 @@ pipeline
 			
       stage('DEPLOY TO DEV ENV') {
         steps {
-          
-                    sh 'echo "Deploying to mesos" '
+                    timeout(time: 5, unit: 'MINUTES'){
+                  echo "Checking out deps variables"
+                  dir('./deps-variables'){
+                        checkout changelog: false, poll: false ,
+                        scm: [$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/deps']],
+                        userRemoteConfigs: [[credentialsId: 'e0d93970-9f7c-46b2-84e3-a32485695',
+                        url: 'git@bitbucket.org:test/deps-variables.git']]]
+                        echo "Deploying to mesos"
+                    	}
+		   }
                      
              }
       }
       
     }
 }
+
 
 
 
